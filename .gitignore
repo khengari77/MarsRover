@@ -1,2 +1,2 @@
 .pio
-data/wifi_config.json
+data/*
