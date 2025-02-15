@@ -5,7 +5,7 @@ all: web_page upload monitor
 
 #	Generate web page
 web_page:
-	python ./scripts/gen_web_page.py ./assets/index.html ./include/web_page.h 
+	python ./scripts/gen_web_page.py ./assets/index.html ./include/SetupPage.h 
 
 # Build the project
 build:
