@@ -3,7 +3,7 @@
 #include "DataTracker.h"
 #include "SetupPage.h"
 
-void WebServerManager::init(const DataTracker& dataTracker, const CommandHandler& commandHandler) {
+void WebServerManager::init(const DataTracker& dataTracker, CommandHandler& commandHandler) {
   handleRoot();
   handleUpdate(dataTracker);
   handleCommand(commandHandler);
@@ -20,30 +20,36 @@ void WebServerManager::handleRoot() {
   });
 }
 
-void WebServerManager::handleCommand(const CommandHandler& commandHandler) {
-  server.on("/command", HTTP_POST, [&commandHandler](AsyncWebServerRequest *request) {
-    JsonDocument doc;
-    if (request->contentType() == "application/json") {
-      // Deserialize directly from the request body
-      DeserializationError error = deserializeJson(doc, request->arg("plain"));
-      if (error) {
-        Serial.print("JSON parse failed: ");
-        Serial.println(error.c_str());
-        request->send(400, "text/plain", "JSON parse failed");
-      }
-      else {
-        commandHandler.handle(doc);
-      }
-    } else {
-      request->send(400, "text/plain", "Unsupported content type");
-    } 
+void WebServerManager::handleCommand(CommandHandler& commandHandler) {
+  AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/command", [&commandHandler](AsyncWebServerRequest *request, JsonVariant &json) {
+    JsonDocument data;
+    if (json.is<JsonArray>())
+    {
+      data = json.as<JsonArray>();
+      request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Arrays not supported\"}");
+      return;
+    }
+    else if (json.is<JsonObject>())
+    {
+      data = json.as<JsonObject>();
+    }
+    else
+    {
+      request->send(400, "application/json", "{\"status\": \"error\", \"message\": \"Invalid JSON\"}");
+      return;
+    }
+    commandHandler.handle(data);
+    request->send(200, "application/json", "{\"status\": \"ok\"}");
   });
+  server.addHandler(handler);
+
 }
 
 void WebServerManager::handleUpdate(const DataTracker& dataTracker) {
   server.on("/update", HTTP_GET, [&dataTracker](AsyncWebServerRequest *request) {
     std::string response;
-    serializeJson(dataTracker.getData(), response);
+    Serial.println("Preparing JSON");
+    serializeJson(dataTracker.getJson(), response);
     Serial.println("Sending: " + String(response.c_str()));
     request->send(200, "application/json", response.c_str());
   });

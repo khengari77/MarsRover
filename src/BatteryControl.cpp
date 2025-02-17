@@ -1,10 +1,7 @@
 #include "BatteryControl.h"
 
-#define S_SCL   33
-#define S_SDA   32
 
 void BatteryControl::init(){
-  Wire.begin(S_SDA, S_SCL);
   if(!ina219.init()){
     Serial.println("INA219 not connected!");
   }

@@ -2,7 +2,6 @@
 
 #include <INA219_WE.h>
 #define INA219_ADDRESS 0x42
-#include <Wire.h>
 
 #include "DataTracker.h"
 

@@ -2,10 +2,23 @@
 
 void WifiManager::init() {
   WiFi.mode(WIFI_STA);
+//  // Set your Static IP address
+//  IPAddress local_IP(192, 168, 1, 100);
+//  // Set your Gateway IP address
+//  IPAddress gateway(192, 168, 1, 1);
+//
+//  IPAddress subnet(255, 255, 0, 0);
+//  if (!WiFi.config(local_IP, gateway, subnet)) {
+//    Serial.println("STA Failed to configure static IP");
+//  }
   SPIFFS.begin();
   loadConfig();
   scanNetworks();
   connectToBestNetwork();
+  
+  Serial.print("STA IP address: ");
+  Serial.println(WiFi.localIP());
+ 
   std::size_t nSavedNetworks = savedNetworks.size();
   if (!connected) {
     WiFi.mode(WIFI_AP_STA);

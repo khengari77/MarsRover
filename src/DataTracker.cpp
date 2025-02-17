@@ -6,6 +6,10 @@ void DataTracker::addValue(const std::string& key, const ValueType& value) {
   data[key] = value;
 }
 
+ValueType DataTracker::getValue(const std::string& key) {
+  return data[key];
+}
+
 void DataTracker::addValueCallback(const std::string& key, ValueCallback callback) {
   valueCallbacks[key] = callback;
   Serial.println("Added callback for: " + String(key.data()));
@@ -18,5 +22,12 @@ void DataTracker::update() {
   }
 }
 
+const JsonDocument DataTracker::getJson() const {
+  JsonDocument doc;
+  for (const auto& [key, value] : data) {
+    doc[key] = value;
+  }
+  return doc;
+}
 
 

@@ -6,9 +6,14 @@
 #include <functional>
 #include <unordered_map>
 #include <variant>
-#include <variant>
+#include <cstdint>
 
-using ValueType = std::variant<std::string, int, double, bool>;
+using ValueType = std::variant<std::string, 
+                               int, 
+                               double, 
+                               bool,
+                               std::int32_t,
+                               std::uint32_t>;
 using ValueCallback = std::function<const ValueType ()>;
 
 namespace ArduinoJson {
@@ -22,10 +27,12 @@ private:
     struct Visitor {
         JsonVariant dst_;
         
-        void operator()(int v) const          { dst_.set(v); }
-        void operator()(double v) const       { dst_.set(v); }
-        void operator()(bool v) const         { dst_.set(v); }
-        void operator()(const std::string& v) { dst_.set(v); }
+        void operator()(int v) const           { dst_.set(v); }
+        void operator()(std::uint32_t v) const { dst_.set(v); }
+        void operator()(std::int32_t v) const  { dst_.set(v); }
+        void operator()(double v) const        { dst_.set(v); }
+        void operator()(bool v) const          { dst_.set(v); }
+        void operator()(const std::string& v)  { dst_.set(v); }
     };
 };
 }
@@ -39,12 +46,14 @@ public:
   void update();
   void addValueCallback(const std::string& key, ValueCallback callback);
   void addValue(const std::string& key, const ValueType& value);
+  ValueType getValue(const std::string& key);
 
 
-  const JsonDocument& getData() const  { return data; }
+  const std::unordered_map<std::string, ValueType>& getData() const  { return data; }
+  const JsonDocument getJson() const;
 
 private:
-  JsonDocument data;
+  std::unordered_map<std::string, ValueType> data;
   std::unordered_map<std::string, ValueCallback> valueCallbacks;
 
 };
